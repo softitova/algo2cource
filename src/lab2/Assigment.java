@@ -1,9 +1,10 @@
-/**
+package lab2; /**
  * Created by Sofia on 14.12.16.
  */
 
 import java.io.*;
 import java.util.StringTokenizer;
+
 import static java.lang.Integer.MAX_VALUE;
 import static java.util.Arrays.fill;
 

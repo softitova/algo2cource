@@ -1,4 +1,4 @@
-/**
+package lab2; /**
  * Created by Sofia on 14.12.16.
  */
 

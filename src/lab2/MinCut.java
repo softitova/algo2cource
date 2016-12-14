@@ -1,15 +1,13 @@
-/**
+package lab2; /**
  * Created by Sofia on 14.12.16.
  */
 
-
-import javafx.util.Pair;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.StringTokenizer;
 
-public class Circulation {
+public class MinCut {
     static HashSet<Integer> firstPart = new HashSet();
 
     static class edge {
@@ -26,7 +24,7 @@ public class Circulation {
     }
 
     static int inf = 1000000000;
-    static int MAXN = 20050;
+    static int MAXN = 2050;
     static int used[];
 
     static int n, m;
@@ -37,7 +35,7 @@ public class Circulation {
     static ArrayList<Integer> g[] = new ArrayList[MAXN];
 
     static long flow = 0;
-    static int index[] = new int[MAXN];
+
 
     static int d[] = new int[MAXN];
     static ArrayList<Integer> q = new ArrayList<>();
@@ -45,7 +43,6 @@ public class Circulation {
 
     static void add_edge(int a, int b, int c, int ind) {
         edge ed = new edge(a, b, 0, c, ind);
-        index[ind] = e.size();
         g[a].add(e.size());
         e.add(ed);
         ed = new edge(b, a, 0, 0, ind);
@@ -116,47 +113,39 @@ public class Circulation {
     }
 
     public static void main(String[] args) throws IOException {
-        ArrayList<Pair<Pair<Integer, Integer>, Integer>> ee = new ArrayList<>();
-        BufferedReader in = new BufferedReader(new FileReader("circulation.in"));
-        PrintWriter out = new PrintWriter(new File("circulation.out"));
+        BufferedReader in = new BufferedReader(new FileReader("cut.in"));
+        PrintWriter out = new PrintWriter(new File("cut.out"));
         StringTokenizer st = new StringTokenizer(in.readLine());
-        n = Integer.parseInt(st.nextToken()) + 2;
+        n = Integer.parseInt(st.nextToken());
         m = Integer.parseInt(st.nextToken());
-        int mm = m;
         used = new int[n];
         for (int i = 0; i < g.length; i++) {
             g[i] = new ArrayList<>();
         }
-        int ll[] = new int[m + 2];
         for (int i = 1; i <= m; i++) {
             st = new StringTokenizer(in.readLine());
-            int a = Integer.parseInt(st.nextToken()) + 1;
-            int b = Integer.parseInt(st.nextToken()) + 1;
-            int l = Integer.parseInt(st.nextToken());
-            int r = Integer.parseInt(st.nextToken());
-            ll[i] = l;
-            add_edge(a, b, r - l, i);
-            add_edge(a, n, l, 0);
-            add_edge(1, b, l, 0);
+            int a = Integer.parseInt(st.nextToken());
+            int b = Integer.parseInt(st.nextToken());
+            int c = Integer.parseInt(st.nextToken());
 
+            add_edge(a, b, c, i);
+            add_edge(b, a, c, m + i);
         }
 
+        int s = 1;
+        int t = n;
 
         dinic();
-        for (edge curEdge : e) {
-            if (curEdge.a == 1 && curEdge.f < curEdge.c) {
-                out.println("NO");
-                out.close();
-                System.exit(0);
-            }
-        }
-        out.println("YES");
-        for (int i = 1; i <= mm; i++) {
-//            System.out.println((e.get(index[i]).a - 1) + " " + (e.get(index[i]).b - 1));
-            out.println(e.get(index[i]).f + ll[i]);
+
+
+        newDfs(s);
+        out.println(firstPart.size());
+        for (Integer x : firstPart) {
+            out.print((x) + " ");
 
         }
         out.close();
+
         //System.out.println(flow);
     }
 
@@ -175,3 +164,4 @@ public class Circulation {
     }
 
 }
+

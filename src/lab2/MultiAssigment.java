@@ -1,11 +1,12 @@
-/**
+package lab2; /**
  * Created by Sofia on 14.12.16.
  */
 
 
 import java.io.*;
 import java.util.*;
-import static java.lang.Integer.*;
+
+import static java.lang.Integer.parseInt;
 
 public class MultiAssigment {
     static ArrayList<edge> arr;

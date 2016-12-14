@@ -1,10 +1,13 @@
-/**
+package lab2; /**
  * Created by Sofia on 14.12.16.
  */
 
 
 import java.io.*;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.StringTokenizer;
+
 import static java.util.Arrays.fill;
 
 public class MinMax {
