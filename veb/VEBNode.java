@@ -10,7 +10,6 @@ class VEBNode {
     int max = IntegerSet.NO;
     int min = IntegerSet.NO;
 
-
     VEBNode(int universeSize) {
         this.universeSize = universeSize;
         initializeChildren(universeSize);
