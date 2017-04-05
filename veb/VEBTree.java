@@ -6,13 +6,9 @@ package veb;
 public class VEBTree implements IntegerSet {
 
     private VEBNode root;
-    private int k;
-
 
     public VEBTree(int k) {
-        this.k = k;
-        int z = (int) Math.pow(2, k);
-        root = new VEBNode(z);
+        root = new VEBNode(k);
     }
 
     @Override
@@ -49,20 +45,22 @@ public class VEBTree implements IntegerSet {
         return findR(root, x);
     }
 
-    private long high(long key) {
-        return (key >> (k));
+    private long high(VEBNode node, long key) {
+        return (key >> (node.k / 2));
     }
 
-    private long low(long key) {
-        return (int) (key & ((1L << (k)) - 1L));
+    private long low(VEBNode node, long key) {
+        return (int) (key & ((1L << (node.k / 2)) - 1L));
     }
 
-    private long merge(long high, long low) {
-        return (high << (k)) + low;
+    private long merge(VEBNode node, long high, long low) {
+        return (high << (node.k / 2)) + low;
     }
 
     private boolean findR(VEBNode root, long x) {
-        return !empty(root) && ((root.min == x || root.max == x) || findR(root.clusters[(int) high(x)], (int) low(x)));
+        return !empty(root)
+                && ((root.min == x || root.max == x)
+                || findR(root.clusters[(int) high(root, x)], (int) low(root, x)));
     }
 
     private boolean empty(VEBNode root) {
@@ -75,17 +73,6 @@ public class VEBTree implements IntegerSet {
             node.max = x;
             return;
         }
-        if (node.min == node.max) {
-            if (node.min < x) {
-                node.max = x;
-            } else {
-                node.min = x;
-            }
-            x = node.max; //
-        }
-        if (x == node.min) {
-            return;
-        }
         if (x < node.min) {
             long t = node.min;
             node.min = x;
@@ -94,67 +81,47 @@ public class VEBTree implements IntegerSet {
         if (x > node.max) {
             node.max = x;
         }
-        if (k != 1) {
-            if (empty(node.clusters[(int) high(x)])) {
-                addT(node.summary, high(x));
+        if (node.k != 1) {
+            if (empty(node.clusters[(int) high(node, x)])) {
+                addT(node.summary, high(node, x));
             }
-            addT(node.clusters[(int) high(x)], low(x));
+            addT(node.clusters[(int) high(node, x)], (int) low(node, x));
         }
     }
 
-
     private void removeT(VEBNode node, long x) {
+
         if (x == node.min) {
-            if (empty(node.summary)) {
+
+            if (node.k == 1 || empty(node.summary)) {
                 node.max = node.min = NO;
                 return;
             }
-            node.min = merge(node.summary.min, node.clusters[(int) node.summary.min].min);
 
-            removeT(node.clusters[(int) node.summary.min], node.clusters[(int) node.summary.min].min);
-            if (node.clusters[(int) node.summary.min].min == NO) {
-                removeT(node.summary, node.summary.min);
+            int summaryMin = (int) node.summary.min;
+            VEBNode clusterSumMin = node.clusters[summaryMin];
+
+            node.min = merge(node, summaryMin, clusterSumMin.min);
+            removeT(clusterSumMin, clusterSumMin.min);
+
+            if (clusterSumMin.min == NO) {
+                removeT(node.summary, summaryMin);
             }
             return;
         }
-        removeT(node.clusters[(int) high(x)], low(x));
-        if (node.clusters[(int) high(x)].min == NO) {
-            removeT(node.summary, high(x));
+
+        int curH = (int) high(node, x);
+        int curL = (int) low(node, x);
+
+        removeT(node.clusters[curH], curL);
+
+        if (node.clusters[curH].min == NO) {
+            removeT(node.summary, curH);
         }
-        node.max = node.summary.min == NO ? node.min
-                : merge(node.summary.max, node.clusters[(int) node.summary.max].max);
-//        if (node.min == x && node.max == x) {
-//            node.min = NO;
-//            return;
-//        }
-//
-//        if (node.min == x) {
-//            if (empty(node.summary)) {
-//                node.min = node.max;
-//                return;
-//            }
-//            x = merge(node.summary.min, node.clusters[(int) node.summary.min].min);
-//            node.min = x;
-//        }
-//        if (node.max == x) {
-//            if (empty(node.summary)) {
-//                node.max = node.min;
-//                return;
-//            }
-//
-//        } else {
-//            x = merge(node.summary.max, node.clusters[(int) node.summary.max].max);
-//            node.max = x;
-//        }
-//
-//        if (empty(node.summary)) {
-//            return;
-//        }
-//        removeT(node.clusters[(int) high(x)], low(x));
-//        if (empty(node.clusters[(int) high(x)])) removeT(node.summary, high(x));
     }
 
     private long nextT(VEBNode node, long x) {
+
         if (empty(node) || node.max <= x) {
             return NO;
         }
@@ -164,24 +131,36 @@ public class VEBTree implements IntegerSet {
         if (empty(node.summary)) {
             return node.max;
         }
-        if (!empty(node.clusters[(int) high(x)]) && node.clusters[(int) high(x)].max > low(x)) {
-            return merge(high(x), nextT(node.clusters[(int) high(x)], low(x)));
+
+        int curH = (int) high(node, x);
+        int curL = (int) low(node, x);
+        VEBNode clusterCurH = node.clusters[curH];
+
+        if (!empty(clusterCurH) && clusterCurH.max > curL) {
+            return merge(node, curH, nextT(clusterCurH, curL));
         }
-        long n = nextT(node.summary, high(x));
-        return n == NO ? node.max : merge(n, node.clusters[(int) n].min);
+
+        long n = nextT(node.summary, curH);
+        return n == NO ? node.max : merge(node, n, node.clusters[(int) n].min);
     }
 
     private long prevT(VEBNode node, long x) {
+
         if (empty(node) || node.min >= x) {
             return NO;
         }
         if (node.max < x) {
             return node.max;
         }
-        if (!empty(node.clusters[(int) high(x)]) && node.clusters[(int) high(x)].min < low(x)) {
-            return merge(high(x), prevT(node.clusters[(int) high(x)], low(x)));
+
+        int curH = (int) high(node, x);
+        int curL = (int) low(node, x);
+        VEBNode clusterCurH = node.clusters[curH];
+
+        if (!empty(clusterCurH) && clusterCurH.min < curL) {
+            return merge(node, high(node, x), prevT(clusterCurH, curL));
         }
-        long n = prevT(node.summary, high(x));
-        return n == NO ? node.min : merge(n, node.clusters[(int) n].max);
+        long n = prevT(node.summary, high(node, x));
+        return n == NO ? node.min : merge(node, n, node.clusters[(int) n].max);
     }
 }
