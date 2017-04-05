@@ -14,60 +14,60 @@ public class VEBTree implements IntegerSet {
     }
 
     @Override
-    public void add(int x) {
+    public void add(long x) {
         addT(root, x);
     }
 
     @Override
-    public void remove(int x) {
+    public void remove(long x) {
         removeT(root, x);
     }
 
     @Override
-    public int next(int x) {
+    public long next(long x) {
         return nextT(root, x);
     }
 
     @Override
-    public int prev(int x) {
+    public long prev(long x) {
         return prevT(root, x);
     }
 
     @Override
-    public int getMin() {
+    public long getMin() {
         return root.min;
     }
 
     @Override
-    public int getMax() {
+    public long getMax() {
         return root.max;
     }
 
-    public boolean find(int x) {
+    public boolean find(long x) {
         return findR(root, x);
     }
 
-    private final int high(int key) {
+    private final long high(long key) {
         return (key >> (k >> 1));
     }
 
-    private final int low(int key) {
+    private final long low(long key) {
         return (int) (key & ((1L << (k >> 1)) - 1L));
     }
 
-    private final int merge(int high, int low) {
+    private final long merge(long high, long low) {
         return (high << (k >> 1)) + low;
     }
 
-    private boolean findR(VEBNode root, int x) {
-        return !empty(root) && ((root.min == x || root.max == x) || findR(root.clusters[high(x)], low(x)));
+    private boolean findR(VEBNode root, long x) {
+        return !empty(root) && ((root.min == x || root.max == x) || findR(root.clusters[(int)high(x)], (int)low(x)));
     }
 
     private boolean empty(VEBNode root) {
         return root.min == NO;
     }
 
-    private void addT(VEBNode node, int x) {
+    private void addT(VEBNode node, long x) {
         if (empty(node)) {
             node.min = node.max = x;
         } else if (node.min == node.max) {
@@ -79,25 +79,25 @@ public class VEBTree implements IntegerSet {
 
         } else {
             if (x < node.min) {
-                int t = node.min;
+                long t = node.min;
                 node.min = x;
                 x = t;
             }
             if (x > node.max) {
-                int t = node.max;
+                long t = node.max;
                 node.max = x;
                 x = t;
             }
             if (k != 1) {
-                if (empty(node.clusters[high(x)])) {
+                if (empty(node.clusters[(int)high(x)])) {
                     addT(node.summary, high(x));
-                    addT(node.clusters[high(x)], low(x));
+                    addT(node.clusters[(int)high(x)], low(x));
                 }
             }
         }
     }
 
-    private void removeT(VEBNode node, int x) {
+    private void removeT(VEBNode node, long x) {
 
         if (node.min == x && node.max == x) {
             node.min = NO;
@@ -106,16 +106,16 @@ public class VEBTree implements IntegerSet {
         }
 
         if (node.min == x) {
-            node.min = removeHelper(node, x, node.summary.min, node.clusters[node.summary.min].min, node.max);
+            node.min = removeHelper(node, x, node.summary.min, node.clusters[(int)node.summary.min].min, node.max);
         } else {
-            node.max = removeHelper(node, x, node.summary.max, node.clusters[node.summary.max].max, node.min);
+            node.max = removeHelper(node, x, node.summary.max, node.clusters[(int)node.summary.max].max, node.min);
         }
         if (empty(node.summary)) return;
-        removeT(node.clusters[high(x)], low(x));
-        if (empty(node.clusters[high(x)])) removeT(node.summary, high(x));
+        removeT(node.clusters[(int)high(x)], low(x));
+        if (empty(node.clusters[(int)high(x)])) removeT(node.summary, high(x));
     }
 
-    private int removeHelper(VEBNode node, int x, int curHigh, int curLow, int val1) {
+    private long removeHelper(VEBNode node, long x, long curHigh, long curLow, long val1) {
         if (empty(node.summary)) {
             return val1;
         }
@@ -123,7 +123,7 @@ public class VEBTree implements IntegerSet {
         return x;
     }
 
-    private int nextT(VEBNode node, int x) {
+    private long nextT(VEBNode node, long x) {
         if (empty(node) || node.max <= x) {
             return NO;
         }
@@ -133,15 +133,15 @@ public class VEBTree implements IntegerSet {
         if (empty(node.summary)) {
             return node.max;
         }
-        if (!empty(node.clusters[high(x)]) && node.clusters[high(x)].max > low(x)) {
-            return merge(high(x), nextT(node.clusters[high(x)], low(x)));
+        if (!empty(node.clusters[(int)high(x)]) && node.clusters[(int)high(x)].max > low(x)) {
+            return merge(high(x), nextT(node.clusters[(int)high(x)], low(x)));
         } else {
-            int n = nextT(node.summary, high(x));
-            return (n == -1) ? node.max : merge(n, node.clusters[n].min);
+            long n = nextT(node.summary, high(x));
+            return (n == -1) ? node.max : merge(n, node.clusters[(int)n].min);
         }
     }
 
-    private int prevT(VEBNode node, int x) {
+    private long prevT(VEBNode node, long x) {
         if (empty(node) || node.min >= x) {
             return NO;
         }
@@ -151,11 +151,11 @@ public class VEBTree implements IntegerSet {
         if (empty(node.summary)) {
             return node.min;
         }
-        if (!empty(node.clusters[high(x)]) && node.clusters[high(x)].min > low(x)) {
-            return merge(high(x), prevT(node.clusters[high(x)], low(x)));
+        if (!empty(node.clusters[(int)high(x)]) && node.clusters[(int)high(x)].min > low(x)) {
+            return merge(high(x), prevT(node.clusters[(int)high(x)], low(x)));
         } else {
-            int p = prevT(node.summary, high(x));
-            return (p == -1) ? node.min : merge(p, node.clusters[p].max);
+            long p = prevT(node.summary, high(x));
+            return (p == -1) ? node.min : merge(p, node.clusters[(int)p].max);
         }
     }
 }

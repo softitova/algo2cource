@@ -7,8 +7,8 @@ class VEBNode {
     private int universeSize;
     VEBNode summary;
     VEBNode[] clusters;
-    int max = IntegerSet.NO;
-    int min = IntegerSet.NO;
+    long max = IntegerSet.NO;
+    long min = IntegerSet.NO;
 
     VEBNode(int universeSize) {
         this.universeSize = universeSize;

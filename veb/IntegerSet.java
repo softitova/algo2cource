@@ -3,16 +3,16 @@ package veb;
 public interface IntegerSet {
     int NO = -1;
 
-    void add(int x);
+    void add(long x);
 
-    void remove(int x);
+    void remove(long x);
 
-    int next(int x);
+    long next(long x);
 
-    int prev(int x);
+    long prev(long x);
 
-    int getMin();
+    long getMin();
 
-    int getMax();
+    long getMax();
 }
 
