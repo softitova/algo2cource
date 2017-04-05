@@ -4,7 +4,7 @@ import java.util.Arrays;
 
 class VEBNode {
 
-    private int universeSize;
+    public static int universeSize;
     VEBNode summary;
     VEBNode[] clusters;
     long max = IntegerSet.NO;
@@ -23,11 +23,11 @@ class VEBNode {
             int childSize = higherSquareRoot();
             summary = new VEBNode(childSize);
             clusters = new VEBNode[childSize];
-            Arrays.fill(clusters,new VEBNode(childSize));
+            Arrays.fill(clusters,new VEBNode(childSize ));
         }
     }
 
     private int higherSquareRoot() {
-        return (int) Math.pow(2, Math.ceil((Math.log10(universeSize) / Math.log10(2)) / 2));
+        return universeSize = (int) Math.pow(2, Math.ceil((Math.log10(universeSize) / Math.log10(2)) / 2));
     }
 }
