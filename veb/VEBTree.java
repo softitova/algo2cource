@@ -41,6 +41,7 @@ public class VEBTree implements IntegerSet {
         return root.max;
     }
 
+
     public boolean find(long x) {
         return findR(root, x);
     }
@@ -91,9 +92,13 @@ public class VEBTree implements IntegerSet {
 
     private void removeT(VEBNode node, long x) {
 
+        if(x == node.max) {
+            node.max = prevT(node, node.max);
+        }
+
         if (x == node.min) {
 
-            if (node.k == 1 || empty(node.summary)) {
+            if (node.k == 1 || empty(node.summary)) { // память / сравнение на нулл
                 node.max = node.min = NO;
                 return;
             }
@@ -110,6 +115,7 @@ public class VEBTree implements IntegerSet {
             return;
         }
 
+// максимум обнулить
         int curH = (int) high(node, x);
         int curL = (int) low(node, x);
 
@@ -119,7 +125,17 @@ public class VEBTree implements IntegerSet {
             removeT(node.summary, curH);
         }
     }
-
+//    add 1
+//    add 17
+//    add 389
+//    add 5
+//    add 144
+//    prev 144
+//            17
+//    remove 389
+//    max
+//    389
+//    dump
     private long nextT(VEBNode node, long x) {
 
         if (empty(node) || node.max <= x) {
