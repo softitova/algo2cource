@@ -1,7 +1,3 @@
-package veb;
-
-import veb.IntegerSet;
-
 import java.util.HashMap;
 
 /**
@@ -9,19 +5,31 @@ import java.util.HashMap;
  */
 public class VEBTree implements IntegerSet {
 
+    private static int pows[] = {1, 2, 4, 8, 16, 32, 64};
     private VEBNode root;
 
     public VEBTree(int k) {
-        root = new VEBNode(k);
+
+        root = new VEBNode(setK(k));
     }
 
+    private int setK(int k) {
+        for (int pow : pows) {
+            if (k <= pow) {
+                return pow;
+            }
+        }
+        return 64;
+    }
 
     public void add(long x) {
         addT(root, x);
     }
 
     public void remove(long x) {
-        removeT(root, x);
+        if (find(x)) {
+            removeT(root, x);
+        }
     }
 
     public long next(long x) {
@@ -40,6 +48,10 @@ public class VEBTree implements IntegerSet {
         return root.max;
     }
 
+    public boolean find(long x) {
+        return findR(root, x);
+    }
+
     private long high(VEBNode node, long key) {
         return (key >> (node.k / 2));
     }
@@ -52,10 +64,18 @@ public class VEBTree implements IntegerSet {
         return ((high << (node.k / 2))) | low;
     }
 
+    private boolean findR(VEBNode root, long x) {
+        return root != null
+                && !empty(root)
+                && ((root.min == x || root.max == x)
+                || (root.clusters != null
+                && root.clusters.containsKey(high(root, x))
+                && findR(root.clusters.get(high(root, x)), low(root, x))));
+    }
+
     private boolean empty(VEBNode root) {
         return root != null && root.min == NO;
     }
-
 
     private void addT(VEBNode node, long x) {
         if (empty(node)) {
@@ -84,7 +104,7 @@ public class VEBTree implements IntegerSet {
     }
 
     private void removeT(VEBNode node, long x) {
-        if (node.min == node.max) {
+        if (node.min == node.max && node.min == x) {
             node.min = node.max = NO;
             return;
         }
@@ -100,7 +120,7 @@ public class VEBTree implements IntegerSet {
                 node.min = node.max;
                 return;
             }
-            if (empty(node.summary)) { // память / сравнение на нулл
+            if (empty(node.summary)) {
                 node.max = node.min = NO;
                 return;
             }
@@ -145,20 +165,17 @@ public class VEBTree implements IntegerSet {
 
     private long nextT(VEBNode node, long x) {
 
-        if (node.k == 1) {
-            if (node.min == NO || x >= node.max) {
-                return NO;
-            }
-            return x < node.min ? node.min : node.max;
-        }
         if (empty(node) || node.max <= x) {
             return NO;
+        }
+        if (x >= node.min && node.k == 1) {
+            return node.max;
         }
         if (node.min > x) {
             return node.min;
         }
 
-        long curH = high(node, x); // empty(node.summary);
+        long curH = high(node, x);
         long curL = low(node, x);
         VEBNode clusterCurH = node.clusters.get(curH);
 
@@ -172,16 +189,14 @@ public class VEBTree implements IntegerSet {
 
     private long prevT(VEBNode node, long x) {
 
-        if (node.k == 1) {
-            if (node.min == NO || x <= node.min) {
-                return NO;
-            }
-            return x > node.max ? node.max : node.min;
-        }
-
         if (empty(node) || node.min >= x) {
             return NO;
         }
+
+        if (node.k == 1 && node.max >= x) {
+            return node.min;
+        }
+
         if (node.max < x) {
             return node.max;
         }
